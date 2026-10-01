@@ -16,10 +16,10 @@ export default async function ProblemPage({
       <section>
         <h1 className="mb-1 text-2xl font-bold">{problem.title}</h1>
         <p className="mb-4 text-sm text-gray-400">{problem.difficulty}</p>
-        <p className="leading-relaxed">{problem.description}</p>
+        <p className="whitespace-pre-wrap leading-relaxed">{problem.description}</p>
       </section>
       <section>
-        <CodeEditor starterCode={problem.starterCode} />
+      <CodeEditor slug={problem.slug} starterCode={problem.starterCode} />
       </section>
     </main>
   );
