@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import CodeEditor from "@/components/CodeEditor";
-
+import Link from "next/link";
 export const dynamic = "force-dynamic";
 
 export default async function ProblemPage({

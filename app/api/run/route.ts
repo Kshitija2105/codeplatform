@@ -40,7 +40,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       stdout: data.stdout ?? "",
       stderr: data.stderr ?? "",
-      compileError: data.compile_output ?? data.message ?? "",
+      compileError: data.compile_output ?? "",
       status: data.status?.description ?? "",
     });
   } catch {
