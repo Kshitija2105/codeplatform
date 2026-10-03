@@ -14,6 +14,7 @@ type P = {
   description: string;
   cpp: string;
   python: string;
+  javascript: string;
   tests: [string, string][];
 };
 
@@ -50,6 +51,10 @@ int main() {
     python: `s = input().strip()
 
 # print true or false
+`,
+    javascript: `const s = require("fs").readFileSync(0, "utf8").trim();
+
+// print true or false
 `,
     tests: [
       ["racecar", "true"],
@@ -96,6 +101,10 @@ int main() {
 
 # print one line for each number from 1 to n
 `,
+    javascript: `const n = parseInt(require("fs").readFileSync(0, "utf8").trim());
+
+// print one line for each number from 1 to n
+`,
     tests: [
       ["5", "1\n2\nFizz\n4\nBuzz"],
       ["3", "1\n2\nFizz"],
@@ -140,6 +149,12 @@ nums = list(map(int, input().split()))
 
 # print the maximum subarray sum
 `,
+    javascript: `const lines = require("fs").readFileSync(0, "utf8").trim().split("\\n");
+const n = parseInt(lines[0]);
+const nums = lines[1].split(" ").map(Number);
+
+// print the maximum subarray sum
+`,
     tests: [
       ["9\n-2 1 -3 4 -1 2 1 -5 4", "6"],
       ["1\n1", "1"],
@@ -180,6 +195,10 @@ int main() {
     python: `s = input().strip()
 
 # print true or false
+`,
+    javascript: `const s = require("fs").readFileSync(0, "utf8").trim();
+
+// print true or false
 `,
     tests: [
       ["()[]{}", "true"],
@@ -229,6 +248,13 @@ nums = list(map(int, input().split()))
 target = int(input())
 
 # print the index of target, or -1
+`,
+    javascript: `const lines = require("fs").readFileSync(0, "utf8").trim().split("\\n");
+const n = parseInt(lines[0]);
+const nums = lines[1].split(" ").map(Number);
+const target = parseInt(lines[2]);
+
+// print the index of target, or -1
 `,
     tests: [
       ["6\n-1 0 3 5 9 12\n9", "4"],
@@ -287,6 +313,14 @@ b = list(map(int, input().split()))
 
 # print the merged array, separated by spaces
 `,
+    javascript: `const lines = require("fs").readFileSync(0, "utf8").trim().split("\\n");
+const n = parseInt(lines[0]);
+const a = lines[1].split(" ").map(Number);
+const m = parseInt(lines[2]);
+const b = lines[3].split(" ").map(Number);
+
+// print the merged array, separated by spaces
+`,
     tests: [
       ["3\n1 3 5\n3\n2 4 6", "1 2 3 4 5 6"],
       ["2\n1 2\n3\n1 1 3", "1 1 1 2 3"],
@@ -328,6 +362,12 @@ int main() {
 nums = list(map(int, input().split()))
 
 # print the missing number
+`,
+    javascript: `const lines = require("fs").readFileSync(0, "utf8").trim().split("\\n");
+const n = parseInt(lines[0]);
+const nums = lines[1].split(" ").map(Number);
+
+// print the missing number
 `,
     tests: [
       ["3\n3 0 1", "2"],
@@ -372,6 +412,12 @@ prices = list(map(int, input().split()))
 
 # print the maximum profit
 `,
+    javascript: `const lines = require("fs").readFileSync(0, "utf8").trim().split("\\n");
+const n = parseInt(lines[0]);
+const prices = lines[1].split(" ").map(Number);
+
+// print the maximum profit
+`,
     tests: [
       ["6\n7 1 5 3 6 4", "5"],
       ["5\n7 6 4 3 1", "0"],
@@ -382,26 +428,12 @@ prices = list(map(int, input().split()))
 ];
 
 async function main() {
-  // Learn the JSON key names from the existing Two Sum problem so the new
-  // problems use exactly the same format as the editor expects.
-  const ref = await prisma.problem.findUnique({ where: { slug: "two-sum" } });
-  let cppKey = "cpp";
-  let pythonKey = "python";
-  if (ref) {
-    try {
-      const keys = Object.keys(JSON.parse(ref.starterCode));
-      pythonKey = keys.find((k) => k.toLowerCase().includes("py")) ?? "python";
-      cppKey = keys.find((k) => k !== pythonKey) ?? "cpp";
-    } catch {
-      // keep defaults
-    }
-  }
-  console.log(`Using starter keys: ${cppKey}, ${pythonKey}`);
-
   for (const p of problems) {
+    // The editor reads starterCode[language], so all three keys are required.
     const starterCode = JSON.stringify({
-      [cppKey]: p.cpp,
-      [pythonKey]: p.python,
+      cpp: p.cpp,
+      python: p.python,
+      javascript: p.javascript,
     });
 
     const problem = await prisma.problem.upsert({
