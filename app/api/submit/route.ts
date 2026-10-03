@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-
+import { getSession } from "@/lib/session";
 const JUDGE0_URL = process.env.JUDGE0_URL ?? "https://ce.judge0.com";
 
 const LANGUAGE_IDS: Record<string, number> = {
@@ -12,6 +12,11 @@ const LANGUAGE_IDS: Record<string, number> = {
 type Result = { verdict: string; passed: number; total: number; detail?: string };
 
 export async function POST(req: Request) {
+  const session = await getSession();
+  if (!session) {
+    return NextResponse.json({ error: "Please log in to submit." }, { status: 401 });
+  }
+  const userId = session.userId;
   const { slug, language, code } = await req.json();
   const languageId = LANGUAGE_IDS[language];
 
@@ -30,6 +35,7 @@ export async function POST(req: Request) {
     await prisma.submission.create({
       data: {
         problemId: problem!.id,
+        userId,
         language,
         code,
         verdict: r.verdict,

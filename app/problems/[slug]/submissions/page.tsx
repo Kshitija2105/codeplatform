@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { getSession } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
@@ -10,9 +11,17 @@ export default async function SubmissionsPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  const session = await getSession();
+
   const problem = await prisma.problem.findUnique({
     where: { slug },
-    include: { submissions: { orderBy: { createdAt: "desc" }, take: 50 } },
+    include: {
+      submissions: {
+        where: { userId: session?.userId ?? -1 },
+        orderBy: { createdAt: "desc" },
+        take: 50,
+      },
+    },
   });
   if (!problem) notFound();
 
@@ -23,7 +32,11 @@ export default async function SubmissionsPage({
       </Link>
       <h1 className="mb-6 mt-2 text-2xl font-bold">Submissions: {problem.title}</h1>
 
-      {problem.submissions.length === 0 ? (
+      {!session ? (
+        <p className="text-gray-400">
+          Please <Link href="/login" className="text-blue-400 hover:underline">log in</Link> to see your submissions.
+        </p>
+      ) : problem.submissions.length === 0 ? (
         <p className="text-gray-400">No submissions yet.</p>
       ) : (
         <table className="w-full text-left text-sm">

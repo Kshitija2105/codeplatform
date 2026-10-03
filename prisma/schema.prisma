@@ -38,4 +38,13 @@ model Submission {
   passed    Int
   total     Int
   createdAt DateTime @default(now())
+  user      User?   @relation(fields: [userId], references: [id])
+}
+model User {
+  id           Int          @id @default(autoincrement())
+  email        String       @unique
+  name         String
+  passwordHash String
+  createdAt    DateTime     @default(now())
+  submissions  Submission[]
 }
