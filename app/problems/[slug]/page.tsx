@@ -21,6 +21,12 @@ export default async function ProblemPage({
         <h1 className="mb-1 text-2xl font-bold">{problem.title}</h1>
         <p className="mb-4 text-sm text-gray-400">{problem.difficulty}</p>
         <p className="whitespace-pre-wrap leading-relaxed">{problem.description}</p>
+        <Link
+          href={`/problems/${slug}/submissions`}
+          className="mt-6 inline-block text-sm text-blue-400 hover:underline"
+        >
+        View submissions
+      </Link>
       </section>
       <section>
         <CodeEditor slug={problem.slug} starterCode={starterCode} />
