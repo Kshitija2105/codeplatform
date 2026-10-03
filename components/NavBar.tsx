@@ -21,6 +21,7 @@ export default async function NavBar() {
         <div className="flex gap-4 text-sm">
           <Link href="/login" className="hover:underline">Log in</Link>
           <Link href="/register" className="hover:underline">Sign up</Link>
+          <Link href="/leaderboard">Leaderboard</Link>
         </div>
       )}
     </nav>
