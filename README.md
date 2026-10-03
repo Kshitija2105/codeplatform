@@ -1,36 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CodePlatform
 
-## Getting Started
+A LeetCode-style coding practice platform. Solve problems in C++, Python or JavaScript, get instant verdicts, and climb the leaderboard.
 
-First, run the development server:
+## Features
+
+- 10 problems with hidden test cases
+- In-browser code editor (Monaco) with C++, Python and JavaScript starters
+- **Run** with custom input, **Submit** to be judged against all test cases
+- User accounts (register, login, logout) with hashed passwords and session cookies
+- Per-problem submission history
+- Leaderboard ranked by problems solved
+
+## Tech stack
+
+Next.js (App Router), TypeScript, Tailwind CSS, Prisma 7 with SQLite, Judge0 for sandboxed code execution, bcrypt for password hashing.
+
+## Setup
 
 ```bash
+npm install
+cp .env.example .env     # then set SESSION_SECRET (openssl rand -base64 32)
+npx prisma migrate dev
+npx prisma generate
+npx tsx prisma/seed.ts
+npx tsx prisma/add-problems.ts
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Code execution uses the public Judge0 CE instance by default. Set `JUDGE0_URL` in `.env` to use your own.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Project structure
 
-## Learn More
+```
+app/            pages and API routes (run, submit, auth)
+components/     CodeEditor, NavBar, AuthForm
+lib/            Prisma client and session helpers
+prisma/         schema, migrations, seed scripts
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Future work
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Self-hosted Judge0, deployment with Postgres, per-test-case results, difficulty filters.
