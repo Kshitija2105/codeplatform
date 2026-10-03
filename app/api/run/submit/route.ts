@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { problems } from "@/data/problems";
+import { prisma } from "@/lib/prisma";
 
 const JUDGE0_URL = process.env.JUDGE0_URL ?? "https://ce.judge0.com";
 
@@ -9,16 +9,36 @@ const LANGUAGE_IDS: Record<string, number> = {
   cpp: 105,
 };
 
+type Result = { verdict: string; passed: number; total: number; detail?: string };
+
 export async function POST(req: Request) {
   const { slug, language, code } = await req.json();
-  const problem = problems.find((p) => p.slug === slug);
   const languageId = LANGUAGE_IDS[language];
 
-  if (!problem || !languageId || typeof code !== "string") {
+  const problem = await prisma.problem.findUnique({
+    where: { slug },
+    include: { testCases: { orderBy: { id: "asc" } } },
+  });
+
+  if (!problem || problem.testCases.length === 0 || !languageId || typeof code !== "string") {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
 
   const total = problem.testCases.length;
+
+  async function finish(r: Result) {
+    await prisma.submission.create({
+      data: {
+        problemId: problem!.id,
+        language,
+        code,
+        verdict: r.verdict,
+        passed: r.passed,
+        total: r.total,
+      },
+    });
+    return NextResponse.json(r);
+  }
 
   for (let i = 0; i < total; i++) {
     const tc = problem.testCases[i];
@@ -43,28 +63,18 @@ export async function POST(req: Request) {
       const statusId: number = data.status?.id ?? 0;
 
       if (statusId === 6) {
-        return NextResponse.json({
-          verdict: "Compile Error",
-          detail: data.compile_output ?? "",
-          passed: i,
-          total,
-        });
+        return finish({ verdict: "Compile Error", detail: data.compile_output ?? "", passed: i, total });
       }
       if (statusId === 5) {
-        return NextResponse.json({ verdict: "Time Limit Exceeded", passed: i, total });
+        return finish({ verdict: "Time Limit Exceeded", passed: i, total });
       }
       if (statusId >= 7) {
-        return NextResponse.json({
-          verdict: "Runtime Error",
-          detail: data.stderr ?? data.message ?? "",
-          passed: i,
-          total,
-        });
+        return finish({ verdict: "Runtime Error", detail: data.stderr ?? "", passed: i, total });
       }
 
       const actual = (data.stdout ?? "").trim();
       if (actual !== tc.expected.trim()) {
-        return NextResponse.json({
+        return finish({
           verdict: "Wrong Answer",
           detail: `Failed on test case ${i + 1}`,
           passed: i,
@@ -79,5 +89,5 @@ export async function POST(req: Request) {
     }
   }
 
-  return NextResponse.json({ verdict: "Accepted", passed: total, total });
+  return finish({ verdict: "Accepted", passed: total, total });
 }

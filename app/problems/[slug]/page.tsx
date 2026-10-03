@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
-import { problems } from "@/data/problems";
+import { prisma } from "@/lib/prisma";
 import CodeEditor from "@/components/CodeEditor";
+
+export const dynamic = "force-dynamic";
 
 export default async function ProblemPage({
   params,
@@ -8,8 +10,10 @@ export default async function ProblemPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const problem = problems.find((p) => p.slug === slug);
+  const problem = await prisma.problem.findUnique({ where: { slug } });
   if (!problem) notFound();
+
+  const starterCode: Record<string, string> = JSON.parse(problem.starterCode);
 
   return (
     <main className="grid min-h-screen grid-cols-1 gap-6 p-8 lg:grid-cols-2">
@@ -19,7 +23,7 @@ export default async function ProblemPage({
         <p className="whitespace-pre-wrap leading-relaxed">{problem.description}</p>
       </section>
       <section>
-      <CodeEditor slug={problem.slug} starterCode={problem.starterCode} />
+        <CodeEditor slug={problem.slug} starterCode={starterCode} />
       </section>
     </main>
   );

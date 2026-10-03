@@ -1,7 +1,14 @@
 import Link from "next/link";
-import { problems } from "@/data/problems";
+import { prisma } from "@/lib/prisma";
 
-export default function ProblemsPage() {
+export const dynamic = "force-dynamic";
+
+export default async function ProblemsPage() {
+  const problems = await prisma.problem.findMany({
+    orderBy: { id: "asc" },
+    select: { slug: true, title: true, difficulty: true },
+  });
+
   return (
     <main className="mx-auto max-w-3xl p-8">
       <h1 className="mb-6 text-3xl font-bold">Problems</h1>
